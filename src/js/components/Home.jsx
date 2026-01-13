@@ -1,86 +1,96 @@
 import React, { useEffect, useState } from "react";
 
-//include images into your bundle
-import rigoImage from "../../img/rigo-baby.jpg";
-
-//create your first component
 const Home = () => {
+	const API_URL = "https://playground.4geeks.com/todo";
+	const USER = "Alberto";
 
-	const API_URL = "https://playground.4geeks.com/todo"
-	const USER = "Alberto"
+	const [todos, setTodos] = useState([]);
+	const [inputValue, setInputValue] = useState("");
 
-	const [tarea, setTarea] = useState([])
-	const [newTarea, setNewTarea] = useState({
+	// Obtener usuario o crearlo
+	const getUser = async () => {
+		const response = await fetch(`${API_URL}/users/${USER}`);
 
-		nombre: "",
-		frase: "",
-		Imagen: ""
-
-	})
-	console.log(tarea);
-
-	const handleInputsCange = (e) => {
-		setNewTarea({
-			...newTarea,
-			[e.target.name]: e.target.value
-			})
-	}
-
-	const getCharacters = async () => {
-		const response = await fetch(`${API_URL}/users/${USER}`)
-		console.log(response);
 		if (!response.ok) {
-			console.log("Debo crear un usuario");
-			creaTeUser()
-			return
+			await createUser();
+			return;
 		}
-		const data = await response.json()
-		console.log(data);
 
+		const data = await response.json();
+		setTodos(data.todos || []);
+	};
 
-	}
+	// Crear usuario
+	const createUser = async () => {
+		await fetch(`${API_URL}/users/${USER}`, {
+			method: "POST",
+		});
+		setTodos([]);
+	};
 
-	const creaTeUser = async () => {
-		const response = await fetch(`${API_URL}/users/${USER}`, {
-			method: "POST"
-		})
-		console.log(response);
-		if (!response.ok) {
-			console.log("Debo crear un usuario");
+	// Agregar tarea
+	const agregarTarea = async (e) => {
+		if (e.key === "Enter" && inputValue.trim() !== "") {
+			const nuevaTarea = {
+				label: inputValue,
+				is_done: false,
+			};
 
-			return
+			await fetch(`${API_URL}/todos/${USER}`, {
+				method: "POST",
+				body: JSON.stringify(nuevaTarea),
+				headers: { "Content-Type": "application/json" },
+			});
+
+			await cargarTareas();
+			setInputValue("");
 		}
-		const data = await response.json()
-		console.log(data);
+	};
 
-	}
+	// Cargar tareas
+	const cargarTareas = async () => {
+		const response = await fetch(`${API_URL}/users/${USER}`);
+		const data = await response.json();
+		setTodos(data.todos || []);
+	};
+
+	// Eliminar tarea
+	const eliminarTarea = async (todoId) => {
+		await fetch(`${API_URL}/todos/${todoId}`, {
+			method: "DELETE",
+		});
+		await cargarTareas();
+	};
 
 	useEffect(() => {
-		getCharacters()
-	}, [])
-
-
-	// fetch() => peticion
-	// .then()  response.json
-	// .then() data
-	// .catch() error
+		getUser();
+	}, []);
 
 	return (
-		<div className="container pt 4">
-			<h2 className="text-center text-light">Hello Rigo!</h2>
-			<form className="mb-5"> 
-				<input 
+		<div className="container">
+			<h1>Lista de tareas</h1>
+
+			<input
 				type="text"
-				className="form-control mb-2"
-				placeholder="Nueva tarea"
-				value={newTarea}
-				onChange={handleInputsCange} 
-				
-				
-				/>
+				placeholder="Escriba aquí su tarea"
+				value={inputValue}
+				onChange={(e) => setInputValue(e.target.value)}
+				onKeyDown={agregarTarea}
+			/>
 
-			</form>
-
+			<ul>
+				{todos.map((todo) => (
+					<li key={todo.id}>
+						{todo.label}
+						<span
+							style={{ marginLeft: "10px", cursor: "pointer" }}
+							onClick={() => eliminarTarea(todo.id)}
+						>
+							X
+						</span>
+					</li>
+				))}
+			</ul>
 		</div>
 	);
 };
