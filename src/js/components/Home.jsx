@@ -80,7 +80,7 @@ const Home = () => {
 				/>
 
 				<ul className="todo-list">
-					<li className="todo-empty">No hay tareas para añadir</li>
+					
 					{todos.map((todo) => (
 						<li key={todo.id}>
 							{todo.label}
