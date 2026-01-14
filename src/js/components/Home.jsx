@@ -67,30 +67,36 @@ const Home = () => {
 	}, []);
 
 	return (
-		<div className="container">
-			<h1>Lista de tareas</h1>
+		<div className="todo-container">
+			<h1 className="todo-title">Lista de tareas</h1>
+			<div className="todo-box">
+				<input
+					type="text"
+					className="todo-input"
+					placeholder="Escriba aquí su tarea"
+					value={inputValue}
+					onChange={(e) => setInputValue(e.target.value)}
+					onKeyDown={agregarTarea}
+				/>
 
-			<input
-				type="text"
-				placeholder="Escriba aquí su tarea"
-				value={inputValue}
-				onChange={(e) => setInputValue(e.target.value)}
-				onKeyDown={agregarTarea}
-			/>
+				<ul className="todo-list">
+					<li className="todo-empty">No hay tareas para añadir</li>
+					{todos.map((todo) => (
+						<li key={todo.id}>
+							{todo.label}
 
-			<ul>
-				{todos.map((todo) => (
-					<li key={todo.id}>
-						{todo.label}
-						<span
-							style={{ marginLeft: "10px", cursor: "pointer" }}
-							onClick={() => eliminarTarea(todo.id)}
-						>
-							X
-						</span>
-					</li>
-				))}
-			</ul>
+							<span
+								className="x"
+								style={{ marginLeft: "10px", cursor: "pointer" }}
+								onClick={() => eliminarTarea(todo.id)}
+							>
+								✕
+							</span>
+
+						</li>
+					))}
+				</ul>
+			</div>
 		</div>
 	);
 };
